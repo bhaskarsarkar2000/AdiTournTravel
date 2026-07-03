@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import MapView from '../../components/MapView';
+import Autocomplete from '../../components/Autocomplete';
 
 const API = import.meta.env.VITE_API_URL || '/api';
 
@@ -56,8 +57,18 @@ export default function SearchBus() {
 
       <div className="bg-gradient-to-r from-blue-700 to-blue-900 py-8 px-4">
         <form onSubmit={search} className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-3">
-          <input type="text" placeholder="From (City)" value={form.source} onChange={(e) => setForm({ ...form, source: e.target.value })} className="input-field" required />
-          <input type="text" placeholder="To (City)" value={form.destination} onChange={(e) => setForm({ ...form, destination: e.target.value })} className="input-field" required />
+          <Autocomplete 
+            type="source"
+            value={form.source} 
+            onChange={(val) => setForm({ ...form, source: val })} 
+            placeholder="From (City)" 
+          />
+          <Autocomplete 
+            type="destination"
+            value={form.destination} 
+            onChange={(val) => setForm({ ...form, destination: val })} 
+            placeholder="To (City)" 
+          />
           <input type="date" value={form.date} min={new Date().toISOString().split('T')[0]} onChange={(e) => setForm({ ...form, date: e.target.value })} className="input-field" required />
           <button type="submit" disabled={loading} className="btn-primary">
             {loading ? 'Searching...' : 'Search 🔍'}

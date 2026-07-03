@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import Autocomplete from '../components/Autocomplete';
 
 const popularRoutes = [
   { from: 'Mumbai', to: 'Pune', duration: '3h 30m', price: 250 },
@@ -46,24 +47,20 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="text-left">
                 <label className="text-gray-500 text-xs font-semibold uppercase tracking-wide block mb-1">From</label>
-                <input
-                  type="text"
-                  placeholder="Departure City"
+                <Autocomplete
+                  type="source"
                   value={form.source}
-                  onChange={(e) => setForm({ ...form, source: e.target.value })}
-                  className="input-field"
-                  required
+                  onChange={(val) => setForm({ ...form, source: val })}
+                  placeholder="Departure City"
                 />
               </div>
               <div className="text-left">
                 <label className="text-gray-500 text-xs font-semibold uppercase tracking-wide block mb-1">To</label>
-                <input
-                  type="text"
-                  placeholder="Arrival City"
+                <Autocomplete
+                  type="destination"
                   value={form.destination}
-                  onChange={(e) => setForm({ ...form, destination: e.target.value })}
-                  className="input-field"
-                  required
+                  onChange={(val) => setForm({ ...form, destination: val })}
+                  placeholder="Arrival City"
                 />
               </div>
               <div className="text-left">
