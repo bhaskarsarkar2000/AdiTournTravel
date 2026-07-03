@@ -1,0 +1,11 @@
+git remote add origin https://github.com/yourusername/TourAndTravel.git
+git branch -M main
+git push -u origin main
+
+git add .
+git commit -m "feature"
+ frontend -- npm install
+frontend -- npm run dev
+
+https://cloud.mongodb.com/v2/6a45f7f4b1970b57100cc536#/security/network/accessList
+backend -- npm run dev
