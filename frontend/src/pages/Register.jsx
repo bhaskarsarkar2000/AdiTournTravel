@@ -7,6 +7,7 @@ import Navbar from '../components/Navbar';
 const roles = [
   { value: 'traveller', label: 'Traveller', icon: '🧳', desc: 'Book bus tickets' },
   { value: 'driver', label: 'Driver', icon: '🚌', desc: 'Drive & manage routes' },
+  { value: 'admin', label: 'Admin', icon: '⚙️', desc: 'Manage the platform' },
 ];
 
 export default function Register() {
@@ -54,19 +55,18 @@ export default function Register() {
             {/* Role */}
             <div className="mb-6">
               <label className="text-sm font-semibold text-gray-600 block mb-3">I am a</label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-2">
                 {roles.map((r) => (
                   <button
                     key={r.value}
                     type="button"
                     onClick={() => setForm({ ...form, role: r.value })}
-                    className={`p-4 rounded-xl border-2 text-left transition-all ${
+                    className={`p-3 rounded-xl border-2 text-center transition-all ${
                       form.role === r.value ? 'border-blue-600 bg-blue-50' : 'border-gray-200 hover:border-blue-300'
                     }`}
                   >
                     <div className="text-2xl mb-1">{r.icon}</div>
-                    <div className="font-semibold text-gray-800">{r.label}</div>
-                    <div className="text-xs text-gray-500">{r.desc}</div>
+                    <div className="text-xs font-semibold text-gray-700">{r.label}</div>
                   </button>
                 ))}
               </div>
