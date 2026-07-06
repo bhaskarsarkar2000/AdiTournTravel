@@ -5,6 +5,8 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 
 import Home from './pages/Home';
 import Login from './pages/Login';
+import AdminLogin from './pages/AdminLogin';
+import DriverLogin from './pages/DriverLogin';
 import Register from './pages/Register';
 
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -34,19 +36,18 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/login" element={user ? <Navigate to={`/${user.role}`} /> : <Login />} />
+      <Route path="/admin" element={user?.role === 'admin' ? <AdminDashboard /> : <AdminLogin />} />
+      <Route path="/driver" element={user?.role === 'driver' ? <DriverDashboard /> : <DriverLogin />} />
       <Route path="/register" element={user ? <Navigate to={`/${user.role}`} /> : <Register />} />
 
-      <Route path="/admin" element={<ProtectedRoute roles={['admin']}><AdminDashboard /></ProtectedRoute>} />
       <Route path="/admin/buses" element={<ProtectedRoute roles={['admin']}><BusManagement /></ProtectedRoute>} />
       <Route path="/admin/routes" element={<ProtectedRoute roles={['admin']}><RouteManagement /></ProtectedRoute>} />
       <Route path="/admin/schedules" element={<ProtectedRoute roles={['admin']}><ScheduleManagement /></ProtectedRoute>} />
       <Route path="/admin/users" element={<ProtectedRoute roles={['admin']}><UserManagement /></ProtectedRoute>} />
 
-      <Route path="/driver" element={<ProtectedRoute roles={['driver']}><DriverDashboard /></ProtectedRoute>} />
-
       <Route path="/traveller" element={<ProtectedRoute roles={['traveller']}><TravellerDashboard /></ProtectedRoute>} />
       <Route path="/search" element={<SearchBus />} />
-      <Route path="/book/:scheduleId" element={<ProtectedRoute roles={['traveller']}><BookingPage /></ProtectedRoute>} />
+      <Route path="/book/:scheduleId" element={<BookingPage />} />
       <Route path="/my-bookings" element={<ProtectedRoute roles={['traveller']}><MyBookings /></ProtectedRoute>} />
 
       <Route path="*" element={<Navigate to="/" />} />

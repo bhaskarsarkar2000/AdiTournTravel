@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import Navbar from '../../components/Navbar';
 import SeatSelector from '../../components/SeatSelector';
 import MapView from '../../components/MapView';
+import CheckoutLogin from '../../components/CheckoutLogin';
 
 const API = import.meta.env.VITE_API_URL || '/api';
 
@@ -17,14 +18,29 @@ export default function BookingPage() {
   const [step, setStep] = useState(1);
   const [passengers, setPassengers] = useState([]);
   const [booking, setBooking] = useState(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
 
   useEffect(() => {
     fetchSchedule();
+    checkUserLogin();
   }, [scheduleId]);
+
+  // Allow access without login - only check at payment
+  useEffect(() => {
+    if (!loading && !schedule) {
+      navigate('/search');
+    }
+  }, [loading, schedule, navigate]);
 
   useEffect(() => {
     setPassengers(selectedSeats.map((sn) => ({ seatNumber: sn, name: '', age: '', gender: 'male' })));
   }, [selectedSeats]);
+
+  const checkUserLogin = () => {
+    const token = localStorage.getItem('token');
+    setIsUserLoggedIn(!!token);
+  };
 
   const fetchSchedule = async () => {
     try {
@@ -48,17 +64,35 @@ export default function BookingPage() {
     setPassengers((prev) => prev.map((p, i) => i === idx ? { ...p, [field]: value } : p));
   };
 
+  const handleLoginSuccess = (user) => {
+    setShowLoginModal(false);
+    setIsUserLoggedIn(true);
+    localStorage.setItem('token', user.token || localStorage.getItem('token'));
+    localStorage.setItem('user', JSON.stringify(user));
+  };
+
+  const handlePaymentClick = () => {
+    if (!isUserLoggedIn) {
+      setShowLoginModal(true);
+      return;
+    }
+    handleBooking();
+  };
+
   const handleBooking = async () => {
     if (passengers.some((p) => !p.name || !p.age)) {
       return toast.error('Fill details for all passengers');
     }
     try {
+      const token = localStorage.getItem('token');
       const { data } = await axios.post(`${API}/bookings`, {
         scheduleId,
         passengers: passengers.map((p) => ({ ...p, age: Number(p.age) })),
         selectedSeats,
         boardingPoint: schedule.route?.source?.name,
         droppingPoint: schedule.route?.destination?.name,
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       setBooking(data);
       initRazorpay(data);
@@ -77,11 +111,14 @@ export default function BookingPage() {
       order_id: bookingData.razorpayOrderId,
       handler: async (response) => {
         try {
+          const token = localStorage.getItem('token');
           await axios.post(`${API}/bookings/verify-payment`, {
             bookingId: bookingData.booking._id,
             razorpayOrderId: response.razorpay_order_id,
             razorpayPaymentId: response.razorpay_payment_id,
             razorpaySignature: response.razorpay_signature,
+          }, {
+            headers: { Authorization: `Bearer ${token}` }
           });
           toast.success('Booking confirmed!');
           navigate('/my-bookings');
@@ -105,6 +142,13 @@ export default function BookingPage() {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
       <script src="https://checkout.razorpay.com/v1/checkout.js" async />
+
+      {showLoginModal && (
+        <CheckoutLogin
+          onLoginSuccess={handleLoginSuccess}
+          onClose={() => setShowLoginModal(false)}
+        />
+      )}
 
       <div className="max-w-6xl mx-auto px-4 py-8 w-full">
         <div className="mb-6">
@@ -207,8 +251,8 @@ export default function BookingPage() {
                 </div>
                 <div className="flex justify-between">
                   <button onClick={() => setStep(2)} className="btn-secondary">← Back</button>
-                  <button onClick={handleBooking} className="btn-primary">
-                    Pay ₹{totalAmount} via Razorpay
+                  <button onClick={handlePaymentClick} className="btn-primary">
+                    {isUserLoggedIn ? `Pay ₹${totalAmount} via Razorpay` : `🔒 Login & Pay ₹${totalAmount}`}
                   </button>
                 </div>
               </div>

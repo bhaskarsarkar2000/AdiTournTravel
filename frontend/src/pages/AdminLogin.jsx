@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 
-export default function Login() {
-  const [form, setForm] = useState({ email: '', password: '', role: 'traveller' });
+export default function AdminLogin() {
+  const [form, setForm] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -14,9 +14,9 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      const data = await login(form.email, form.password, form.role);
+      const data = await login(form.email, form.password, 'admin');
       toast.success(`Welcome back, ${data.user.name}!`);
-      navigate(`/${form.role}`);
+      navigate('/admin');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Login failed. Check your credentials.');
     } finally {
@@ -25,23 +25,23 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100">
       <Navbar />
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <div className="text-5xl mb-3">🧳</div>
-            <h1 className="text-3xl font-bold text-gray-800">Traveller Login</h1>
-            <p className="text-gray-500 mt-1">Sign in to book your tickets</p>
+            <div className="text-5xl mb-3">⚙️</div>
+            <h1 className="text-3xl font-bold text-gray-800">Admin Portal</h1>
+            <p className="text-gray-500 mt-1">Access the admin dashboard</p>
           </div>
 
-          <div className="card shadow-xl">
+          <div className="card shadow-xl border-l-4 border-red-600">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="text-sm font-semibold text-gray-600 block mb-1">Email</label>
+                <label className="text-sm font-semibold text-gray-600 block mb-1">Admin Email</label>
                 <input
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder="admin@example.com"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   className="input-field"
@@ -60,21 +60,19 @@ export default function Login() {
                 />
               </div>
               <button type="submit" disabled={loading} className="btn-primary w-full mt-2">
-                {loading ? 'Signing in...' : 'Sign in'}
+                {loading ? 'Signing in...' : 'Sign in as Admin'}
               </button>
             </form>
 
-            <p className="text-center text-sm text-gray-500 mt-4">
-              Don't have an account?{' '}
-              <Link to="/register" className="text-blue-600 font-semibold hover:underline">Register here</Link>
+            <p className="text-center text-xs text-gray-500 mt-4">
+              <Link to="/login" className="text-blue-600 font-semibold hover:underline">← Back to Traveller Login</Link>
             </p>
           </div>
 
-          {/* Admin & Driver Info */}
-          <div className="mt-6 p-4 bg-blue-100 border-l-4 border-blue-600 rounded-lg">
-            <p className="text-sm text-blue-800 font-semibold">👨‍✈️ Admin or Driver?</p>
-            <p className="text-xs text-blue-700 mt-2">
-              Visit <Link to="/admin" className="font-bold hover:underline">/admin</Link> or <Link to="/driver" className="font-bold hover:underline">/driver</Link> to access your dashboard.
+          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-xs text-red-800">
+              <span className="font-bold">🔐 Admin Only</span><br/>
+              This portal is restricted to administrators only. Unauthorized access is prohibited.
             </p>
           </div>
         </div>

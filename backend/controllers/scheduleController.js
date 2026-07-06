@@ -7,8 +7,14 @@ exports.createSchedule = async (req, res) => {
     const bus = await Bus.findById(req.body.bus);
     if (!bus) return res.status(404).json({ success: false, message: 'Bus not found' });
 
+    // If daily schedule, journeyDate is not required
+    const scheduleData = { ...req.body };
+    if (!scheduleData.isDaily && !scheduleData.journeyDate) {
+      return res.status(400).json({ success: false, message: 'Journey date is required for non-daily schedules' });
+    }
+
     const schedule = await Schedule.create({
-      ...req.body,
+      ...scheduleData,
       availableSeats: bus.totalSeats,
     });
     await schedule.populate(['bus', 'route', 'driver']);
@@ -29,6 +35,10 @@ exports.searchSchedules = async (req, res) => {
     const nextDay = new Date(searchDate);
     nextDay.setDate(nextDay.getDate() + 1);
 
+    // Get day of week name (Monday, Tuesday, etc.)
+    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const dayOfWeek = daysOfWeek[searchDate.getDay()];
+
     const routes = await Route.find({
       'source.name': { $regex: source, $options: 'i' },
       'destination.name': { $regex: destination, $options: 'i' },
@@ -37,10 +47,16 @@ exports.searchSchedules = async (req, res) => {
 
     const routeIds = routes.map((r) => r._id);
 
+    // Find both specific date schedules and daily recurring schedules
     const schedules = await Schedule.find({
       route: { $in: routeIds },
-      journeyDate: { $gte: searchDate, $lt: nextDay },
       status: 'scheduled',
+      $or: [
+        // Specific date schedules
+        { journeyDate: { $gte: searchDate, $lt: nextDay }, isDaily: false },
+        // Daily recurring schedules that match the day of week
+        { isDaily: true, daysOfWeek: dayOfWeek },
+      ],
     }).populate('bus route driver');
 
     res.json({ success: true, count: schedules.length, schedules });
@@ -51,7 +67,14 @@ exports.searchSchedules = async (req, res) => {
 
 exports.getAllSchedules = async (req, res) => {
   try {
-    const schedules = await Schedule.find().populate('bus route driver').sort('-journeyDate');
+    // Get only active routes
+    const activeRoutes = await Route.find({ isActive: true });
+    const activeRouteIds = activeRoutes.map(r => r._id);
+
+    // Get schedules for active routes only
+    const schedules = await Schedule.find({ route: { $in: activeRouteIds } })
+      .populate('bus route driver')
+      .sort({ isDaily: 1, journeyDate: -1 });
     res.json({ success: true, count: schedules.length, schedules });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

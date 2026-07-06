@@ -18,6 +18,29 @@ exports.getAllRoutes = async (req, res) => {
   }
 };
 
+// Get popular routes (limit 6) from database
+exports.getPopularRoutes = async (req, res) => {
+  try {
+    const routes = await Route.find({ isActive: true })
+      .limit(6)
+      .sort({ createdAt: -1 });
+    
+    // If less than 6 routes, return what we have
+    const popularRoutes = routes.map(route => ({
+      _id: route._id,
+      from: route.source.name,
+      to: route.destination.name,
+      distance: route.distance || 'N/A',
+      duration: route.estimatedDuration || 'N/A',
+      routeName: route.routeName
+    }));
+    
+    res.json({ success: true, count: popularRoutes.length, routes: popularRoutes });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 exports.getRoute = async (req, res) => {
   try {
     const route = await Route.findById(req.params.id);

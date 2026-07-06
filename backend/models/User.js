@@ -2,10 +2,10 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
-  name: { type: String, required: true, trim: true },
+  name: { type: String, trim: true },
   email: { type: String, required: true, unique: true, lowercase: true },
-  phone: { type: String, required: true },
-  password: { type: String, required: true },
+  phone: { type: String },
+  password: { type: String },
   role: { type: String, enum: ['admin', 'driver', 'traveller'], required: true },
   isActive: { type: Boolean, default: true },
   profileImage: { type: String, default: '' },
@@ -14,6 +14,10 @@ const userSchema = new mongoose.Schema({
   vehicleAssigned: { type: mongoose.Schema.Types.ObjectId, ref: 'Bus' },
   // Traveller-specific fields
   address: { type: String },
+  // OTP fields
+  otp: { type: String, default: null },
+  otpExpiry: { type: Date, default: null },
+  isVerified: { type: Boolean, default: false },
 }, { timestamps: true });
 
 userSchema.pre('save', async function (next) {

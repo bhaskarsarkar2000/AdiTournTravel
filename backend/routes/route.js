@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 const { protect, authorize } = require('../middleware/auth');
 const {
-  createRoute, getAllRoutes, getRoute, updateRoute, deleteRoute,
+  createRoute, getAllRoutes, getRoute, updateRoute, deleteRoute, getPopularRoutes,
 } = require('../controllers/routeController');
 
+router.get('/popular', getPopularRoutes);
 router.get('/', getAllRoutes);
 router.get('/:id', getRoute);
 

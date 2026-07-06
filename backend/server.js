@@ -14,6 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/buses', require('./routes/bus'));
+app.use('/api/cities', require('./routes/city'));
 app.use('/api/routes', require('./routes/route'));
 app.use('/api/schedules', require('./routes/schedule'));
 app.use('/api/bookings', require('./routes/booking'));
